@@ -15,6 +15,7 @@ protected slots:
     void onCreateButtonClicked();
     void onItemClicked(QStandardItem* item);
     void onPropertiesChanged();
+    void onModelExported(QString dirPath,int type);
 private:
     Ui::QtWidgetsVTKTestClass ui;
 

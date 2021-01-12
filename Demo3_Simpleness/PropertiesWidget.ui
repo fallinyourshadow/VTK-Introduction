@@ -647,6 +647,70 @@
     </widget>
    </item>
    <item>
+    <widget class="QGroupBox" name="groupBox_export">
+     <property name="title">
+      <string>导出文件</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>文件名</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEdit_fileName"/>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QComboBox" name="comboBox_type">
+        <item>
+         <property name="text">
+          <string>.stl</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>.g</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>.vtp</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>.vtk</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>.ply</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>.obj</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton_export">
+        <property name="text">
+         <string>导出</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <widget class="QPushButton" name="pushButton_remove">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">

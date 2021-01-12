@@ -2,7 +2,7 @@
 
 #include "vtkSmartPointer.h"
 #include "vtkRenderWindow.h"
-
+#include "vtkSTLWriter.h"
 #include "vtkRenderWindowInteractor.h"
 #include "vtkInteractorStyleTrackballCamera.h"
 #include "vtkCylinderSource.h"
@@ -17,7 +17,7 @@
 #include "PrismItem.h"
 #include "PyramidItem.h"
 #include "SphereItem.h"
-#include "STLModelItem.h"
+#include "ModelItem.h"
 #include "C3DsModelItem.h"
 
 #include "vtkNamedColors.h"
@@ -43,25 +43,61 @@ QtWidgetsVTKTest::QtWidgetsVTKTest(QWidget* parent) : QMainWindow(parent)
 	ui.listView->setMaximumWidth(100);
 	ui.widget->GetRenderWindow()->AddRenderer(m_renderer);//将renderer放到vtk widget中
 	
-	QAction * actionLoadStlFile = new QAction(ToLocal8Bit("加载.stl文件"));
+	QAction * actionLoadStlFile = new QAction(ToLocal8Bit("加载模型文件"));
 	ui.menu->addAction(actionLoadStlFile);
 	connect(actionLoadStlFile, &QAction::triggered, [=]() {
 		static quint32 counter = 1;
-		QFileDialog file(0, QString::fromLocal8Bit("选择stl文件"), "C:\\Users\\Administrator\\Desktop\\", "*.stl");
+		QFileDialog file(0, QString::fromLocal8Bit("选择模型文件"), 
+			"C:\\Users\\Administrator\\Desktop\\", 
+			"models (*.stl *.ply *.g *.obj *.vtk *.vtp)");
 		file.setFileMode(QFileDialog::ExistingFile);
 		if (file.exec() != 1)
 			return;
 		QStringList fileList = file.selectedFiles();
 		if (fileList.size() != 1)
 			return;
-		STLModelItem* item = new STLModelItem;
-		item->loadFile(fileList.at(0));
+		ModelItem* item = new ModelItem;
+		QString str;
+		QString fileName = fileList.at(0);
+
+		QTextCodec* code = QTextCodec::codecForName("GB2312");//解决中文路径问题
+		std::string name = code->fromUnicode(fileName).data();
+
+		if (fileName.isEmpty())
+		{
+			return;
+		}
+
+		switch (item->loadFile(name))
+		{
+		case Type::StlModel:
+			str = QString("%1%2").arg(QString::fromLocal8Bit("Stl模型")).arg(counter++);
+			break;
+		case Type::GModel:
+			str = QString("%1%2").arg(QString::fromLocal8Bit("G模型")).arg(counter++);
+			break;
+		case Type::VtkModel:
+			str = QString("%1%2").arg(QString::fromLocal8Bit("Vtk模型")).arg(counter++);
+			break;
+		case Type::PlyModel:
+			str = QString("%1%2").arg(QString::fromLocal8Bit("Ply模型")).arg(counter++);
+			break;
+		case Type::ObjModel:
+			str = QString("%1%2").arg(QString::fromLocal8Bit("Obj模型")).arg(counter++);
+			break;
+		case Type::VtpModel:
+			str = QString("%1%2").arg(QString::fromLocal8Bit("Vtp模型")).arg(counter++);
+			break;
+		default:
+			str = QString("%1%2").arg(QString::fromLocal8Bit("无效模型")).arg(counter++);
+			break;
+		}
 		m_renderer->AddActor(item->actor());
 		ui.widget->GetRenderWindow()->Render();
-		QString str = QString("%1%2").arg(QString::fromLocal8Bit("stl模型")).arg(counter++);
 		item->setText(str);
 		model->appendRow(item);
 	});
+
 	QAction* actionLoad3DSFile = new QAction(ToLocal8Bit("加载.3ds文件"));
 	ui.menu->addAction(actionLoad3DSFile);
 	connect(actionLoad3DSFile, &QAction::triggered, [=]() {
@@ -79,6 +115,7 @@ QtWidgetsVTKTest::QtWidgetsVTKTest(QWidget* parent) : QMainWindow(parent)
 		
 		item->loadFile(fileList.at(0));
 		item->source()->Update();
+		
 		//m_renderer->AddActor(item->actor());
 
 		ui.widget->GetRenderWindow()->Render();
@@ -117,8 +154,10 @@ QtWidgetsVTKTest::QtWidgetsVTKTest(QWidget* parent) : QMainWindow(parent)
 
 
 	PropertiesWidget* propertiesWidget = new PropertiesWidget(this);
-	ui.dockWidget->setWidget(propertiesWidget);
+	ui.dockWidget->setWidget( propertiesWidget );
 	propertiesWidget->hide();
+	//
+	connect(propertiesWidget, &PropertiesWidget::modelExported, this, &QtWidgetsVTKTest::onModelExported);
 	//属性改变
 	connect( propertiesWidget, &PropertiesWidget::propertiesChanged, this, &QtWidgetsVTKTest::onPropertiesChanged );
 	//删除对象
@@ -192,4 +231,24 @@ void QtWidgetsVTKTest::onItemClicked(QStandardItem* item)
 void QtWidgetsVTKTest::onPropertiesChanged()
 {
 	ui.widget->GetRenderWindow()->Render();
+}
+
+void QtWidgetsVTKTest::onModelExported(QString dirPath, int type)
+{
+	PropertiesWidget* propertiesWidget = qobject_cast<PropertiesWidget*>(ui.dockWidget->widget());
+	vtkNew<vtkSTLWriter> stlWriter;
+	GeometryItem* item = propertiesWidget->selectedItem();
+	if (item == nullptr)
+		return;
+	//
+	if (type == Type::StlModel)
+	{
+		qDebug() << dirPath << type;
+		//QTextCodec* code = QTextCodec::codecForName("GB2312");//解决中文路径问题
+		//std::string name = code->fromUnicode(dirPath).data();
+		//
+		stlWriter->SetFileName(dirPath.toStdString().c_str());
+		stlWriter->SetInputConnection(item->polyData());
+		stlWriter->Write();
+	}
 }

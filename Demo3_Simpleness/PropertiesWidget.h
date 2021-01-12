@@ -18,9 +18,11 @@ public:
     explicit PropertiesWidget(QWidget *parent = nullptr);
     ~PropertiesWidget();
     void setSelectedItem(GeometryItem* item);
+    GeometryItem* selectedItem();
 signals:
     void propertiesChanged();
     void removeItem(GeometryItem*);
+    void modelExported(QString dirPath, int type);
 private slots:
     
     void positionChanged(double);
@@ -37,9 +39,9 @@ private slots:
     void RegularPolyhedronPropertiesChanged(double);
 private:
     void hideAllSpecificWidget();
+    void showCommonProperties();
     void setObjName(const QString& name);
     GeometryItem* m_pSelectedItem;
-
 
     Ui::PropertiesWidget *ui;
 

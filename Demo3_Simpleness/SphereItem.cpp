@@ -5,7 +5,8 @@ m_properties({ DefaultThetaResolution, DefaultPhiResolution,DefaultRadius })
 {
 	m_sphere = vtkSmartPointer<vtkSphereSource>::New();
 	setRegularPolyhedronProperties(m_properties);
-	mapper()->SetInputConnection(m_sphere->GetOutputPort());
+	mapper()->SetInputConnection(0, m_sphere->GetOutputPort(0));
+	setPolyData(m_sphere->GetOutputPort(0));
 	setData(QVariant(Type::RegularPolyhedron), Qt::UserRole + UserRole::Type);
 }
 
@@ -30,4 +31,5 @@ void SphereItem::setRegularPolyhedronProperties(RegularPolyhedronProperties& pro
 	m_sphere->SetThetaResolution(m_properties.nThetaResolution);
 	m_sphere->SetPhiResolution(m_properties.nPhiResolution);
 	m_sphere->SetRadius(m_properties.lfRadius);
+	
 }

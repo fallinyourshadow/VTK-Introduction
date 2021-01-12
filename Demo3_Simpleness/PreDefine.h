@@ -27,6 +27,11 @@ enum Type {
 	Pyramid,
 	RegularPolyhedron,
 	StlModel,
+	ObjModel,
+	PlyModel,
+	VtkModel,
+	VtpModel,
+	GModel,
 	C3DsModel
 };
 #define DefaultHeight 0.1

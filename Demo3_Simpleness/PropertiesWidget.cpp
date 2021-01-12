@@ -3,7 +3,9 @@
 #include "PrismItem.h"
 #include "PyramidItem.h"
 #include "SphereItem.h"
+#include "ModelItem.h"
 #include <QDoubleSpinBox>
+#include <QFileDialog>
 #include <qdebug.h>
 PropertiesWidget::PropertiesWidget(QWidget* parent) :
     QWidget(parent),
@@ -11,7 +13,23 @@ PropertiesWidget::PropertiesWidget(QWidget* parent) :
     m_pSelectedItem(nullptr)
 {
     ui->setupUi(this);
-
+    {//导出控件
+        ui->comboBox_type->setItemData(0,QVariant( Type::StlModel), Qt::UserRole + UserRole::Type);
+        connect(ui->pushButton_export, &QPushButton::clicked, [=]() {
+            QString selectedDir =
+                QFileDialog::getExistingDirectory();
+            if (selectedDir == "")
+                return;
+            if (ui->lineEdit_fileName->text() == "")
+                return;
+            selectedDir.append("/")
+                .append(ui->lineEdit_fileName->text())
+                .append(ui->comboBox_type->currentText());  
+            if (QFile(selectedDir).exists())
+                return;
+            Q_EMIT modelExported(selectedDir,ui->comboBox_type->currentData(Qt::UserRole + UserRole::Type).toInt());
+        });
+    }
     {//通用属性控件
         //位置
         m_pSenderPosx = ui->doubleSpinBox_posx;
@@ -249,9 +267,28 @@ void PropertiesWidget::setSelectedItem(GeometryItem* item)
         ui->groupBox_RegularPolyhedron->show();
         break;
     }
+    case Type::StlModel:
+    case Type::ObjModel:
+    case Type::PlyModel:
+    case Type::VtkModel:
+    case Type::GModel:
+    case Type::VtpModel:
+    case Type::C3DsModel:
+    {
+        ModelItem* modelItem = (ModelItem*)item;
+        ui->lineEdit_fileName->setText(modelItem->name());
+        
+        break;
+    }
     default:
         break;
     }
+    showCommonProperties();
+}
+
+GeometryItem* PropertiesWidget::selectedItem()
+{
+    return m_pSelectedItem;
 }
 
 
@@ -432,6 +469,13 @@ void PropertiesWidget::hideAllSpecificWidget()
     ui->groupBox_pyramid->hide();
     ui->groupBox_prism->hide();
     ui->groupBox_RegularPolyhedron->hide();
+    ui->groupBox_export->hide();
+}
+
+void PropertiesWidget::showCommonProperties()
+{
+
+    ui->groupBox_export->show();
 }
 
 void PropertiesWidget::setObjName(const QString& name)

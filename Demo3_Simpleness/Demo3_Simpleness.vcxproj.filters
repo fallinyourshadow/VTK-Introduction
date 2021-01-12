@@ -56,10 +56,10 @@
     <ClCompile Include="SphereItem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="STLModelItem.cpp">
+    <ClCompile Include="C3DsModelItem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C3DsModelItem.cpp">
+    <ClCompile Include="ModelItem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -90,10 +90,10 @@
     <ClInclude Include="SphereItem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="STLModelItem.h">
+    <ClInclude Include="C3DsModelItem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C3DsModelItem.h">
+    <ClInclude Include="ModelItem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

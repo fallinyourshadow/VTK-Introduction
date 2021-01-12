@@ -5,7 +5,9 @@ m_properties({ DefaultHeight, DefaultRadius, DefaultSide })
 {
 	m_cone = vtkSmartPointer<vtkConeSource>::New();
 	setPyramidProperties( m_properties );
-	mapper()->SetInputConnection( m_cone->GetOutputPort() );
+
+	mapper()->SetInputConnection(0, m_cone->GetOutputPort(0) );
+	setPolyData(m_cone->GetOutputPort(0));
 	setData( QVariant(Type::Pyramid), Qt::UserRole + UserRole::Type );
 }
 

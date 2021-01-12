@@ -18,11 +18,14 @@ public:
 	vtkSmartPointer<vtkActor> actor();
 	const CommonProperties& commonProperties();
 	void setCommonProperties(CommonProperties&);
+	vtkAlgorithmOutput* polyData();
+	void setPolyData(vtkAlgorithmOutput* polyData);
 protected:
 
 private:
 	vtkSmartPointer<vtkPolyDataMapper> m_cylinderMapper;//mapper对象
 	vtkSmartPointer<vtkActor> m_cylinderActor;//actor对象
 	CommonProperties m_properties;
+	vtkAlgorithmOutput * m_polyData;//Source对象
 };
 

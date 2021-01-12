@@ -49,3 +49,12 @@ void GeometryItem::setCommonProperties(CommonProperties& properties)
 	
 	memcpy(&m_properties, &properties, sizeof(CommonProperties));
 }
+vtkAlgorithmOutput* GeometryItem::polyData()
+{
+	return m_polyData;
+}
+
+void GeometryItem::setPolyData(vtkAlgorithmOutput *polyData)
+{
+	m_polyData = polyData;
+}

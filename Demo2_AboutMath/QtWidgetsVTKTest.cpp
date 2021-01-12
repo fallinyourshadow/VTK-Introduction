@@ -47,8 +47,6 @@ QtWidgetsVTKTest::QtWidgetsVTKTest(QWidget* parent) : QMainWindow(parent)
 		std::cout << "两点距离的平方 = " << squaredDistance << std::endl;
 		std::cout << "两点距离 = " << distance << std::endl;
 		std::cout << "------------------------------------------------------------------" << std::endl;
-
-		
 	}
 	
 	{
