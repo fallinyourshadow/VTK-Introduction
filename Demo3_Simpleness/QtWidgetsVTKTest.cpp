@@ -10,6 +10,12 @@
 #include "vtkActor.h"
 #include "vtkRendererCollection.h"
 #include "vtkCamera.h"
+#include "vtkPLYWriter.h"
+#include "vtkOBJWriter.h"
+#include "vtkBYUWriter.h"
+
+
+
 
 #include <vtkAutoInit.h>
 #include "PreDefine.h"
@@ -48,7 +54,7 @@ QtWidgetsVTKTest::QtWidgetsVTKTest(QWidget* parent) : QMainWindow(parent)
 	connect(actionLoadStlFile, &QAction::triggered, [=]() {
 		static quint32 counter = 1;
 		QFileDialog file(0, QString::fromLocal8Bit("选择模型文件"), 
-			"C:\\Users\\Administrator\\Desktop\\", 
+			"../model", 
 			"models (*.stl *.ply *.g *.obj *.vtk *.vtp)");
 		file.setFileMode(QFileDialog::ExistingFile);
 		if (file.exec() != 1)
@@ -60,15 +66,14 @@ QtWidgetsVTKTest::QtWidgetsVTKTest(QWidget* parent) : QMainWindow(parent)
 		QString str;
 		QString fileName = fileList.at(0);
 
-		QTextCodec* code = QTextCodec::codecForName("GB2312");//解决中文路径问题
-		std::string name = code->fromUnicode(fileName).data();
+		
 
 		if (fileName.isEmpty())
 		{
 			return;
 		}
 
-		switch (item->loadFile(name))
+		switch (item->loadFile(fileName))
 		{
 		case Type::StlModel:
 			str = QString("%1%2").arg(QString::fromLocal8Bit("Stl模型")).arg(counter++);
@@ -102,24 +107,31 @@ QtWidgetsVTKTest::QtWidgetsVTKTest(QWidget* parent) : QMainWindow(parent)
 	ui.menu->addAction(actionLoad3DSFile);
 	connect(actionLoad3DSFile, &QAction::triggered, [=]() {
 		static quint32 counter = 1;
-		QFileDialog file(0, QString::fromLocal8Bit("选择3ds文件"), "C:\\Users\\Administrator\\Desktop\\", "*.3ds");
+		QFileDialog file(0, ToLocal8Bit("选择3ds文件"), "../model", "*.3ds");
 		file.setFileMode(QFileDialog::ExistingFile);
 		if (file.exec() != 1)
 			return;
 		QStringList fileList = file.selectedFiles();
-		qDebug() << fileList.size();
 		if (fileList.size() != 1)
 			return;
 		C3DsModelItem* item = new C3DsModelItem;
 		item->source()->SetRenderWindow(ui.widget->GetRenderWindow());
-		
-		item->loadFile(fileList.at(0));
+
+		QString fileName = fileList.at(0);
+		QTextCodec* code = QTextCodec::codecForName("GB2312");//解决中文路径问题
+		std::string name = code->fromUnicode(fileName).data();
+
+		if (fileName.isEmpty())
+		{
+			return;
+		}
+
+		item->loadFile(name);
 		item->source()->Update();
-		
 		//m_renderer->AddActor(item->actor());
 
 		ui.widget->GetRenderWindow()->Render();
-		QString str = QString("%1%2").arg(QString::fromLocal8Bit("3ds模型")).arg(counter++);
+		QString str = QString("%1%2").arg(ToLocal8Bit("3ds模型")).arg(counter++);
 		item->setText(str);
 		model->appendRow(item);
 
@@ -215,7 +227,6 @@ void QtWidgetsVTKTest::onCreateButtonClicked()
 void QtWidgetsVTKTest::onItemClicked(QStandardItem* item)
 {
 	PropertiesWidget* propertiesWidget = qobject_cast<PropertiesWidget*>(ui.dockWidget->widget());
-	
 	if (item == nullptr)
 	{
 		ui.dockWidget->widget()->hide();
@@ -236,19 +247,39 @@ void QtWidgetsVTKTest::onPropertiesChanged()
 void QtWidgetsVTKTest::onModelExported(QString dirPath, int type)
 {
 	PropertiesWidget* propertiesWidget = qobject_cast<PropertiesWidget*>(ui.dockWidget->widget());
-	vtkNew<vtkSTLWriter> stlWriter;
 	GeometryItem* item = propertiesWidget->selectedItem();
 	if (item == nullptr)
 		return;
-	//
-	if (type == Type::StlModel)
+	qDebug() << type;
+	const char* filePath = dirPath.toLocal8Bit().toStdString().c_str();
+	switch (type)
 	{
-		qDebug() << dirPath << type;
-		//QTextCodec* code = QTextCodec::codecForName("GB2312");//解决中文路径问题
-		//std::string name = code->fromUnicode(dirPath).data();
-		//
-		stlWriter->SetFileName(dirPath.toStdString().c_str());
+	case Type::StlModel:
+	{
+		vtkNew<vtkSTLWriter> stlWriter;
+		stlWriter->SetFileName(filePath);
 		stlWriter->SetInputConnection(item->polyData());
 		stlWriter->Write();
+		break;
 	}
+	case Type::PlyModel:
+	{
+		vtkNew<vtkPLYWriter> plyWriter;
+		plyWriter->SetFileName(filePath);
+		plyWriter->SetInputConnection(item->polyData());
+		plyWriter->Write();
+		break;
+	}
+	case Type::ObjModel:
+	{
+		vtkNew<vtkOBJWriter> objWriter;
+		objWriter->SetFileName(filePath);
+		objWriter->SetInputConnection(item->polyData());
+		objWriter->Write();
+		break;
+	}
+	default:
+		break;
+	}
+
 }

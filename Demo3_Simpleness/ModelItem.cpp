@@ -9,81 +9,141 @@
 #include <qDebug>
 ModelItem::ModelItem():GeometryItem()
 {
-	
+
+
+
+    
 }
 
 ModelItem::~ModelItem()
 {
+    if (m_pVtkAlgorithmOutput == nullptr)
+        return;
+    switch (data(Qt::UserRole + UserRole::Type).toInt())
+    {
+    case Type::StlModel:
+    {
+        vtkSTLReader* reader = (vtkSTLReader*)m_pVtkAlgorithmOutput;
+        reader->Delete();
+        break; 
+    }
+    case Type::PlyModel:
+    {
+        vtkPLYReader* reader = (vtkPLYReader*)m_pVtkAlgorithmOutput;
+        reader->Delete();
+        break;
+    }
+    case Type::ObjModel:
+    {
+        vtkOBJReader* reader = (vtkOBJReader*)m_pVtkAlgorithmOutput;
+        reader->Delete();
+        break;
+    }
+    case Type::VtkModel:
+    {
+        vtkPolyDataReader* reader = (vtkPolyDataReader*)m_pVtkAlgorithmOutput;
+        reader->Delete();
+        break;
+    }
+    case Type::VtpModel:
+    {
+        vtkXMLPolyDataReader* reader = (vtkXMLPolyDataReader*)m_pVtkAlgorithmOutput;
+        reader->Delete();
+        break;
+    }
+    case Type::GModel:
+    {
+        vtkBYUReader* reader = (vtkBYUReader*)m_pVtkAlgorithmOutput;
+        reader->Delete();
+        break;
+    }
+    case Type::RegularPolyhedron:
+    {
+        vtkSphereSource* reader = (vtkSphereSource*)m_pVtkAlgorithmOutput;
+        reader->Delete();
+        break;
+    }
+    default:
+        break;
+    }
 }
 
 
-int ModelItem::loadFile(const std::string &filePath)
+int ModelItem::loadFile(const QString &filePath)
 {
+    QTextCodec* code = QTextCodec::codecForName("GB2312");//解决中文路径问题
+    std::string fileName = code->fromUnicode(filePath).data();
     std::string extension =
-        vtksys::SystemTools::GetFilenameExtension(filePath);
+        vtksys::SystemTools::GetFilenameExtension(fileName);
     std::string name =
-        vtksys::SystemTools::GetFilenameName(filePath);
+        vtksys::SystemTools::GetFilenameName(filePath.toStdString().c_str());
     m_name = QString(name.c_str());
     m_name.replace(QString(extension.c_str()), "");
     if (extension == ".ply")
     {
-        vtkSmartPointer<vtkPLYReader> reader = vtkSmartPointer<vtkPLYReader>::New();
-        reader->SetFileName(filePath.c_str());
+        vtkPLYReader * reader = vtkPLYReader::New();
+        reader->SetFileName(fileName.c_str());
         reader->Update();
         setPolyData(reader->GetOutputPort(0));
         setData(QVariant(Type::PlyModel), Qt::UserRole + UserRole::Type);
+        m_pVtkAlgorithmOutput = reader;
     }
     else if (extension == ".vtp")
     {
-        vtkSmartPointer<vtkXMLPolyDataReader> reader = vtkSmartPointer<vtkXMLPolyDataReader>::New();
-        reader->SetFileName(filePath.c_str());
+        vtkXMLPolyDataReader * reader = vtkXMLPolyDataReader::New();
+        reader->SetFileName(fileName.c_str());
         reader->Update();
         setPolyData(reader->GetOutputPort(0));
         setData(QVariant(Type::VtpModel), Qt::UserRole + UserRole::Type);
+        m_pVtkAlgorithmOutput = reader;
     }
     else if (extension == ".obj")
     {
-        vtkSmartPointer<vtkOBJReader> reader = vtkSmartPointer<vtkOBJReader>::New();
-        reader->SetFileName(filePath.c_str());
+        vtkOBJReader * reader = vtkOBJReader::New();
+        reader->SetFileName(fileName.c_str());
         reader->Update();
         setPolyData(reader->GetOutputPort(0));
         setData(QVariant(Type::ObjModel), Qt::UserRole + UserRole::Type);
+        m_pVtkAlgorithmOutput = reader;
     }
-    else if (extension == ".stl"|| extension == ".STL")
+    else if (extension == ".stl" || extension == ".STL")
     {
         vtkSTLReader * reader = vtkSTLReader::New();
-        reader->SetFileName(filePath.c_str());
+        reader->SetFileName(fileName.c_str());
         reader->Update();
 
         setPolyData(reader->GetOutputPort(0));
 
         setData(QVariant(Type::StlModel), Qt::UserRole + UserRole::Type);
+        m_pVtkAlgorithmOutput = reader;
     }
     else if (extension == ".vtk")
     {
-        vtkSmartPointer<vtkPolyDataReader> reader = vtkSmartPointer<vtkPolyDataReader>::New();
-        reader->SetFileName(filePath.c_str());
+        vtkPolyDataReader * reader = vtkPolyDataReader::New();
+        reader->SetFileName(fileName.c_str());
         reader->Update();
         setPolyData(reader->GetOutputPort(0));
         setData(QVariant(Type::VtkModel), Qt::UserRole + UserRole::Type);
+        m_pVtkAlgorithmOutput = reader;
     }
     else if (extension == ".g")
     {
-        vtkSmartPointer<vtkBYUReader> reader = vtkSmartPointer<vtkBYUReader>::New();
-        reader->SetGeometryFileName(filePath.c_str());
+        vtkBYUReader * reader = vtkBYUReader::New();
+        reader->SetGeometryFileName(fileName.c_str());
         reader->Update();
         setPolyData(reader->GetOutputPort(0));
         setData(QVariant(Type::GModel), Qt::UserRole + UserRole::Type);
+        m_pVtkAlgorithmOutput = reader;
     }
     else 
     {
-        vtkSmartPointer<vtkSphereSource> source = vtkSmartPointer<vtkSphereSource>::New();
+        vtkSphereSource * source = vtkSphereSource::New();
         source->Update();
         setPolyData(source->GetOutputPort(0));
         setData(QVariant(Type::RegularPolyhedron), Qt::UserRole + UserRole::Type);
+        m_pVtkAlgorithmOutput = source;
     }
     mapper()->SetInputConnection(0, polyData());
-    qDebug() << "dasdasdas";
     return data(Qt::UserRole + UserRole::Type).toInt();
 }
 

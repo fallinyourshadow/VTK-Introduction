@@ -110,6 +110,13 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>比例:</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
       <item>
@@ -401,6 +408,13 @@
           </item>
          </layout>
         </item>
+        <item>
+         <widget class="QSlider" name="horizontalSlider_scale">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
      </layout>
@@ -671,21 +685,6 @@
         <item>
          <property name="text">
           <string>.stl</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>.g</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>.vtp</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>.vtk</string>
          </property>
         </item>
         <item>

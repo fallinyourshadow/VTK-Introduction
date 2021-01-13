@@ -1,8 +1,8 @@
 #include "GeometryItem.h"
-
+#include <qdebug.h>
 
 GeometryItem::GeometryItem():QStandardItem(),
-m_properties({ {0,0,0},{0,0,0},0xffffffff})
+m_properties({ {0,0,0}, {0,0,0}, 0xffffffff, 0x0fffffff})
 {
 	m_cylinderMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 	m_cylinderActor = vtkSmartPointer<vtkActor>::New();
@@ -46,7 +46,10 @@ void GeometryItem::setCommonProperties(CommonProperties& properties)
 	actor()->RotateX( properties.rot[0] - m_properties.rot[0] );
 	actor()->RotateY( properties.rot[1] - m_properties.rot[1] );
 	actor()->RotateZ( properties.rot[2] - m_properties.rot[2] );
-	
+
+	double Scale = (double)properties.scale / (double)0x7fffffff;
+	qDebug() << Scale;
+	actor()->SetScale(Scale);
 	memcpy(&m_properties, &properties, sizeof(CommonProperties));
 }
 vtkAlgorithmOutput* GeometryItem::polyData()

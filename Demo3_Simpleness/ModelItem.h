@@ -7,10 +7,10 @@ class ModelItem :
 public:
     ModelItem();
     virtual ~ModelItem();
-    int loadFile(const std::string& filePath);
+    int loadFile(const QString &filePath);
     QString name() const;
     void setName(const QString &name);
 private:
     QString m_name;
- 
+    vtkObject* m_pVtkAlgorithmOutput;
 };

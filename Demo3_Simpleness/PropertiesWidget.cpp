@@ -4,6 +4,7 @@
 #include "PyramidItem.h"
 #include "SphereItem.h"
 #include "ModelItem.h"
+#include "C3DsModelItem.h"
 #include <QDoubleSpinBox>
 #include <QFileDialog>
 #include <qdebug.h>
@@ -15,6 +16,8 @@ PropertiesWidget::PropertiesWidget(QWidget* parent) :
     ui->setupUi(this);
     {//导出控件
         ui->comboBox_type->setItemData(0,QVariant( Type::StlModel), Qt::UserRole + UserRole::Type);
+        ui->comboBox_type->setItemData(1, QVariant(Type::PlyModel), Qt::UserRole + UserRole::Type);
+        ui->comboBox_type->setItemData(2, QVariant(Type::ObjModel), Qt::UserRole + UserRole::Type);
         connect(ui->pushButton_export, &QPushButton::clicked, [=]() {
             QString selectedDir =
                 QFileDialog::getExistingDirectory();
@@ -116,6 +119,15 @@ PropertiesWidget::PropertiesWidget(QWidget* parent) :
             static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
             this,
             &PropertiesWidget::colorChanged);
+
+        m_pSenderSlider = ui->horizontalSlider_scale;
+        m_pSenderSlider->setRange(1, 0x7fffffff);
+        m_pSenderSlider->setValue(1);
+        connect(m_pSenderSlider,
+            static_cast<void (QSlider::*)(int)>(&QSlider::valueChanged),
+            this,
+            &PropertiesWidget::scaleChanged);
+
     }
     
     {//棱柱属性控件
@@ -199,7 +211,6 @@ PropertiesWidget::PropertiesWidget(QWidget* parent) :
             this,
             static_cast<void (PropertiesWidget::*)(double)>(&PropertiesWidget::RegularPolyhedronPropertiesChanged));
     }
-
     connect(ui->pushButton_remove, &QPushButton::clicked, [=]() {
         Q_EMIT removeItem(m_pSelectedItem);
     });
@@ -230,6 +241,7 @@ void PropertiesWidget::setSelectedItem(GeometryItem* item)
     m_pSenderRoty->setValue( item->commonProperties().rot[1] );
     m_pSenderRotz->setValue( item->commonProperties().rot[2] );
 
+    m_pSenderSlider->setValue(item->commonProperties().scale);
     const unsigned char* rgb;
     rgb = (const unsigned char*)&( item->commonProperties().uColor );
 
@@ -273,11 +285,15 @@ void PropertiesWidget::setSelectedItem(GeometryItem* item)
     case Type::VtkModel:
     case Type::GModel:
     case Type::VtpModel:
-    case Type::C3DsModel:
     {
         ModelItem* modelItem = (ModelItem*)item;
         ui->lineEdit_fileName->setText(modelItem->name());
-        
+        break;
+    }
+    case Type::C3DsModel:
+    {
+        // C3DsModelItem* modelItem = (C3DsModelItem*)item;
+        // ui->lineEdit_fileName->setText(modelItem->name());
         break;
     }
     default:
@@ -361,6 +377,18 @@ void PropertiesWidget::colorChanged(int value)
     {
         color[3] = value;
     }
+    if (m_pSelectedItem)
+    {
+        m_pSelectedItem->setCommonProperties(prop);
+        Q_EMIT propertiesChanged();
+    }
+}
+
+void PropertiesWidget::scaleChanged(int value)
+{
+    CommonProperties prop;
+    memcpy(&prop, &(m_pSelectedItem->commonProperties()), sizeof(CommonProperties));
+    prop.scale = value;
     if (m_pSelectedItem)
     {
         m_pSelectedItem->setCommonProperties(prop);

@@ -13,6 +13,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Demo4_JPGViewer", "Demo4_JP
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Demo0_QtWidgetsVTKTest", "Demo0_QtWidgetsVTKTest\Demo0_QtWidgetsVTKTest.vcxproj", "{D220E05B-5F25-48B2-8316-B466572C417C}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Demo5_Texture", "Demo5_Texture\Demo5_Texture.vcxproj", "{5621E04E-F60A-46DB-AF47-4BDE3D5EACE9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -39,6 +41,10 @@ Global
 		{D220E05B-5F25-48B2-8316-B466572C417C}.Debug|x64.Build.0 = Debug|x64
 		{D220E05B-5F25-48B2-8316-B466572C417C}.Release|x64.ActiveCfg = Release|x64
 		{D220E05B-5F25-48B2-8316-B466572C417C}.Release|x64.Build.0 = Release|x64
+		{5621E04E-F60A-46DB-AF47-4BDE3D5EACE9}.Debug|x64.ActiveCfg = Debug|x64
+		{5621E04E-F60A-46DB-AF47-4BDE3D5EACE9}.Debug|x64.Build.0 = Debug|x64
+		{5621E04E-F60A-46DB-AF47-4BDE3D5EACE9}.Release|x64.ActiveCfg = Release|x64
+		{5621E04E-F60A-46DB-AF47-4BDE3D5EACE9}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

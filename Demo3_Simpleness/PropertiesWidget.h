@@ -7,6 +7,7 @@
 #include "GeometryItem.h"
 #include <QDoubleSpinBox>
 #include <QSpinBox>
+#include <QSlider>
 namespace Ui {
 class PropertiesWidget;
 }
@@ -28,7 +29,8 @@ private slots:
     void positionChanged(double);
     void rotationChanged(double);
     void colorChanged(int);
-    
+    void scaleChanged(int);
+
     void prismPropertiesChanged(int);
     void prismPropertiesChanged(double);
 
@@ -58,6 +60,8 @@ private:
     QSpinBox* m_pSenderColorG;
     QSpinBox* m_pSenderColorB;
     QSpinBox* m_pSenderColorA;
+
+    QSlider* m_pSenderSlider;
     //¿‚÷˘ Ù–‘øÿº˛
     QSpinBox* m_pSenderSideN;
     QDoubleSpinBox* m_pSenderSideLen;

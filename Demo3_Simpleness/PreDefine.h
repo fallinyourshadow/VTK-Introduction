@@ -67,6 +67,7 @@ typedef struct
 	double pos[3];
 	double rot[3];
 	unsigned int uColor;//ÑÕÉ« ºì ÂÌ À¶ Í¸Ã÷¶È
+	int scale;
 }CommonProperties;
 
 typedef struct
