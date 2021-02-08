@@ -13,12 +13,19 @@
 #include "vtkPLYWriter.h"
 #include "vtkOBJWriter.h"
 #include "vtkBYUWriter.h"
-
-
-
+#include "vtkInteractorStyleTerrain.h"
+#include "vtkCallbackCommand.h"
+#include "vtkInteractorStyleUser.h"
+#include "vtkAxesActor.h"
+#include "vtkTransform.h"
+#include "vtkCaptionActor2D.h"
+#include "vtkTextProperty.h"
 
 #include <vtkAutoInit.h>
 #include "PreDefine.h"
+
+
+
 
 #include "PrismItem.h"
 #include "PyramidItem.h"
@@ -36,7 +43,48 @@
 #include <qmessagebox.h>
 VTK_MODULE_INIT(vtkRenderingOpenGL2)
 VTK_MODULE_INIT(vtkInteractionStyle)
+namespace {
+	void ClickCallbackFunction(vtkObject*, long unsigned int, void*, void*)
+	{
+		std::cout << "Click callback" << std::endl;
 
+		// We can get the calling object like this:
+		// vtkRenderWindowInteractor *iren =
+		//  static_cast<vtkRenderWindowInteractor*>(caller);
+	}
+	class KeyPressInteractorStyle : public vtkInteractorStyleTrackballCamera
+	{
+	public:
+		static KeyPressInteractorStyle* New();
+		vtkTypeMacro(KeyPressInteractorStyle, vtkInteractorStyleTrackballCamera);
+
+		virtual void OnKeyPress() override
+		{
+			// Get the keypress
+			vtkRenderWindowInteractor* rwi = this->Interactor;
+			std::string key = rwi->GetKeySym();
+
+			// Output the key that was pressed
+			std::cout << "Pressed " << key << std::endl;
+
+			// Handle an arrow key
+			if (key == "Up")
+			{
+				std::cout << "The up arrow was pressed." << std::endl;
+			}
+
+			// Handle a "normal" key
+			if (key == "a")
+			{
+				std::cout << "The a key was pressed." << std::endl;
+			}
+
+			// Forward events
+			vtkInteractorStyleTrackballCamera::OnKeyPress();
+		}
+	};
+	vtkStandardNewMacro(KeyPressInteractorStyle);
+}
 QtWidgetsVTKTest::QtWidgetsVTKTest(QWidget* parent) : QMainWindow(parent)
 {
 	m_renderer = vtkSmartPointer<vtkRenderer>::New();//renderer对象
@@ -151,18 +199,13 @@ QtWidgetsVTKTest::QtWidgetsVTKTest(QWidget* parent) : QMainWindow(parent)
 	connect( ui.pushButton_2, &QPushButton::clicked, this, &QtWidgetsVTKTest::onCreateButtonClicked );
 	connect( ui.pushButton_3, &QPushButton::clicked, this, &QtWidgetsVTKTest::onCreateButtonClicked );
 
-	//
+	//item被选中
 	connect(ui.listView, &ListView::itemClicked,this, &QtWidgetsVTKTest::onItemClicked);
-
-	
-	//ui.widget->GetRenderWindow()->AddRenderer(renderer2);
-	//ui.widget->GetRenderWindow()->GetRenderers()->RemoveItem(1);
 
 	QWidget* center = new QWidget( this );
 	center->setLayout(ui.horizontalLayout );
 	center->setWindowTitle( "Render Window" );
 	setCentralWidget( center );
-
 
 
 	PropertiesWidget* propertiesWidget = new PropertiesWidget(this);
@@ -181,13 +224,67 @@ QtWidgetsVTKTest::QtWidgetsVTKTest(QWidget* parent) : QMainWindow(parent)
 		model->removeRow(item->row());
 		ui.widget->GetRenderWindow()->Render();
 	});
-
 	vtkSmartPointer<vtkRenderWindowInteractor> iren =
 		vtkSmartPointer<vtkRenderWindowInteractor>::New();
 	iren->SetRenderWindow(ui.widget->GetRenderWindow());
-	vtkSmartPointer<vtkInteractorStyleTrackballCamera> style =
+#define s3
+#ifdef s1 
+
+	vtkSmartPointer<vtkInteractorStyleTerrain> style1 =
+		vtkSmartPointer<vtkInteractorStyleTerrain>::New();
+	iren->SetInteractorStyle(style1);
+#elif s2 
+	vtkSmartPointer<vtkInteractorStyleTrackballCamera> style2 =
 		vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New();
-	iren->SetInteractorStyle(style);
+	iren->SetInteractorStyle(style2);
+#elif s3 1
+	//自定义的交互
+	vtkSmartPointer<vtkCallbackCommand> clickCallback = vtkSmartPointer<vtkCallbackCommand>::New();
+	clickCallback->SetCallback(ClickCallbackFunction);
+	iren->AddObserver(vtkCommand::LeftButtonPressEvent,
+		clickCallback);
+	//vtkSmartPointer<vtkInteractorStyleUser> style = vtkSmartPointer<vtkInteractorStyleUser>::New();
+	//iren->SetInteractorStyle(style);
+#endif // 1
+
+	//捕获键盘事件
+	vtkSmartPointer<KeyPressInteractorStyle> style4 = vtkSmartPointer<KeyPressInteractorStyle>::New();
+	iren->SetInteractorStyle(style4);
+	style4->SetCurrentRenderer(m_renderer);
+
+	/*
+	//坐标系
+	vtkSmartPointer<vtkTransform> transform = vtkSmartPointer<vtkTransform>::New();
+	transform->Translate(1.0, 0.0, 0.0);
+
+	vtkSmartPointer<vtkAxesActor> axes = vtkSmartPointer<vtkAxesActor>::New();
+	// properties of the axes labels can be set as follows
+// this sets the x axis label to red
+	vtkNew<vtkNamedColors> colors;
+	axes->GetXAxisCaptionActor2D()->GetCaptionTextProperty()->SetColor(colors->GetColor3d("Red").GetData());
+	axes->GetYAxisCaptionActor2D()->GetCaptionTextProperty()->SetColor(colors->GetColor3d("Green").GetData());
+	axes->GetZAxisCaptionActor2D()->GetCaptionTextProperty()->SetColor(colors->GetColor3d("Blue").GetData());
+// the actual text of the axis label can be changed:
+	axes->SetXAxisLabelText("X");
+	axes->SetYAxisLabelText("Y");
+	axes->SetZAxisLabelText("Z");
+	// The axes are positioned with a user transform
+	axes->SetUserTransform(transform);
+
+	// properties of the axes labels can be set as follows
+	// this sets the x axis label to red
+	// axes->GetXAxisCaptionActor2D()->GetCaptionTextProperty()->SetColor(
+	//   colors->GetColor3d("Red").GetData());
+
+	// the actual text of the axis label can be changed:
+	// axes->SetXAxisLabelText("test");
+
+	m_renderer->AddActor(axes);
+	m_renderer->GetActiveCamera()->Azimuth(50);
+	m_renderer->GetActiveCamera()->Elevation(-30);
+	m_renderer->ResetCamera();
+	ui.widget->GetRenderWindow()->Render();
+	*/
 }
 
 void QtWidgetsVTKTest::onCreateButtonClicked()

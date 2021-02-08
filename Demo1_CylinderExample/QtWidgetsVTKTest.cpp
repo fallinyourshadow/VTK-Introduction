@@ -40,6 +40,7 @@ QtWidgetsVTKTest::QtWidgetsVTKTest(QWidget* parent) : QMainWindow(parent)
 	// Here we set its color and rotate it around the X and Y axes.
 	vtkNew<vtkActor> cylinderActor;
 	cylinderActor->SetMapper(cylinderMapper);
+
 	cylinderActor->GetProperty()->SetColor(
 		colors->GetColor4d("Orange").GetData());
 	cylinderActor->RotateX(60);

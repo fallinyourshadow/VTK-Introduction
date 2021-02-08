@@ -89,7 +89,4 @@ QtWidgetsVTKTest::QtWidgetsVTKTest(QWidget* parent)
     renderer->UseHiddenLineRemovalOn();
 
     ui.widget->GetRenderWindow()->AddRenderer(renderer);//将renderer放到vtk widget中显示
-       /*  */
-
-
 }
